@@ -1,0 +1,126 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Stock Analysis Lambda Function with SES and CloudWatch'
+
+Parameters:
+  EmailRecipient:
+    Type: String
+    Description: Email address to receive stock analysis reports
+
+  OpenAIApiKey:
+    Type: String
+    NoEcho: true
+    Description: OpenAI API Key
+
+  LambdaFunctionName:
+    Type: String
+    Default: stock-analysis-function
+    Description: Name for the Lambda function
+
+Resources:
+  # IAM Role for Lambda
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: SESAndCloudWatchPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - ses:SendEmail
+                  - ses:SendRawEmail
+                  - ses:GetSendQuota
+                  - ses:GetSendStatistics
+                Resource: '*'
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                  - cloudwatch:PutMetricData
+                Resource: '*'
+
+  # Lambda Function
+  StockAnalysisFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Ref LambdaFunctionName
+      Runtime: python3.9
+      Handler: lambda_function.lambda_handler
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Code:
+        ZipFile: |
+          # Placeholder - upload your lambda_deploy.zip manually
+          def lambda_handler(event, context):
+              return {"statusCode": 200, "body": "Please upload the deployment package"}
+      Timeout: 900  # 15 minutes
+      MemorySize: 1024
+      Environment:
+        Variables:
+          OPENAI_API_KEY: !Ref OpenAIApiKey
+          EMAIL_RECIPIENT: !Ref EmailRecipient
+          OPENAI_MODEL: gpt-4o
+          BATCH_SIZE: '20'
+          TOP_STOCKS_COUNT: '25'
+          MAX_RETRIES: '3'
+          RETRY_DELAY: '1.0'
+          REQUEST_TIMEOUT: '30'
+          MAX_WORKERS: '5'
+          SES_REGION: !Ref AWS::Region
+
+  # CloudWatch Log Group
+  LambdaLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${LambdaFunctionName}'
+      RetentionInDays: 14
+
+  # EventBridge Rule for scheduled execution (optional)
+  ScheduleRule:
+    Type: AWS::Events::Rule
+    Properties:
+      Description: 'Trigger stock analysis daily'
+      ScheduleExpression: 'cron(0 9 ? * MON-FRI *)'  # 9 AM weekdays
+      State: DISABLED  # Enable manually when ready
+      Targets:
+        - Arn: !GetAtt StockAnalysisFunction.Arn
+          Id: StockAnalysisTarget
+          Input: |
+            {
+              "sp500_data": [
+                {"Symbol": "AAPL", "Sector": "Technology"},
+                {"Symbol": "MSFT", "Sector": "Technology"}
+              ]
+            }
+
+  # Permission for EventBridge to invoke Lambda
+  PermissionForEventsToInvokeLambda:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref StockAnalysisFunction
+      Action: lambda:InvokeFunction
+      Principal: events.amazonaws.com
+      SourceArn: !GetAtt ScheduleRule.Arn
+
+Outputs:
+  LambdaFunctionArn:
+    Description: ARN of the Lambda function
+    Value: !GetAtt StockAnalysisFunction.Arn
+
+  LambdaFunctionName:
+    Description: Name of the Lambda function
+    Value: !Ref StockAnalysisFunction
+
+  IAMRoleArn:
+    Description: ARN of the IAM role
+    Value: !GetAtt LambdaExecutionRole.Arn

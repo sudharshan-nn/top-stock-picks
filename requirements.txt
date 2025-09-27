@@ -1,0 +1,7 @@
+openai==1.13.3
+pydantic<2.0.0
+yfinance
+boto3
+pandas
+numpy
+typing-extensions
