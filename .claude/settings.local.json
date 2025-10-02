@@ -1,0 +1,33 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pip install:*)",
+      "Bash(find:*)",
+      "Bash(docker run:*)",
+      "Bash(zip:*)",
+      "Bash(python3:*)",
+      "Bash(rm:*)",
+      "Bash(mkdir:*)",
+      "Bash(git add:*)",
+      "Bash(aws s3 cp:*)",
+      "Bash(timeout 30 aws lambda invoke --function-name stock-analysis-function --cli-binary-format raw-in-base64-out --payload file://test_payload.json response_quick.json)",
+      "Bash(cat:*)",
+      "Bash(aws lambda update-function-code:*)",
+      "Bash(aws s3 ls:*)",
+      "WebSearch",
+      "Bash(aws lambda invoke:*)",
+      "Bash(aws logs describe-log-streams:*)",
+      "Bash(aws logs get-log-events:*)",
+      "Bash(xargs rm:*)",
+      "Bash(timeout 120 aws lambda invoke:*)",
+      "Bash(aws lambda get-function:*)",
+      "Bash(timeout 180 aws lambda invoke --function-name stock-analysis-function --cli-binary-format raw-in-base64-out --payload file://test_payload.json response_test.json)",
+      "Bash(unzip:*)",
+      "Bash(curl -s 'https://en.wikipedia.org/wiki/List_of_S%26P_500_companies')",
+      "Bash(aws logs tail:*)",
+      "Bash(awk:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

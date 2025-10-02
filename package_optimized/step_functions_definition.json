@@ -1,0 +1,63 @@
+{
+  "Comment": "S&P 500 Stock Analysis Workflow",
+  "StartAt": "InitiateAnalysis",
+  "States": {
+    "InitiateAnalysis": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "stock-analysis-orchestrator",
+        "Payload": {
+          "operation": "chunk_data",
+          "sp500_data.$": "$.sp500_data"
+        }
+      },
+      "ResultPath": "$.chunking_result",
+      "Next": "ProcessChunksInParallel"
+    },
+    "ProcessChunksInParallel": {
+      "Type": "Map",
+      "ItemsPath": "$.chunking_result.Payload.chunks",
+      "MaxConcurrency": 10,
+      "Iterator": {
+        "StartAt": "ProcessSingleChunk",
+        "States": {
+          "ProcessSingleChunk": {
+            "Type": "Task",
+            "Resource": "arn:aws:states:::lambda:invoke",
+            "Parameters": {
+              "FunctionName": "stock-analysis-function",
+              "Payload": {
+                "operation": "process_chunk",
+                "chunk_id.$": "$.chunk_id",
+                "sp500_data.$": "$.data"
+              }
+            },
+            "Retry": [
+              {
+                "ErrorEquals": ["States.TaskFailed"],
+                "IntervalSeconds": 10,
+                "MaxAttempts": 3,
+                "BackoffRate": 2.0
+              }
+            ],
+            "End": true
+          }
+        }
+      },
+      "Next": "CollectAndAnalyze"
+    },
+    "CollectAndAnalyze": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "stock-analysis-function",
+        "Payload": {
+          "operation": "finalize_results",
+          "chunk_results.$": "$"
+        }
+      },
+      "End": true
+    }
+  }
+}
