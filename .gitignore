@@ -6,9 +6,45 @@ __pycache__/
 .Python
 env/
 venv/
+*.egg-info/
+.eggs/
+dist/
+build/
 
-# AWS & Deployment
+# Dependencies - DO NOT COMMIT
+package_optimized/boto3/
+package_optimized/botocore/
+package_optimized/s3transfer/
+package_optimized/requests/
+package_optimized/urllib3/
+package_optimized/certifi/
+package_optimized/charset_normalizer/
+package_optimized/idna/
+package_optimized/jmespath/
+package_optimized/dateutil/
+package_optimized/numpy/
+package_optimized/pandas/
+package_optimized/pytz/
+package_optimized/lxml/
+package_optimized/html5lib/
+package_optimized/webencodings/
+package_optimized/bs4/
+package_optimized/beautifulsoup4/
+package_optimized/soupsieve/
+package_optimized/multitasking/
+package_optimized/yfinance/
+package_optimized/frozendict/
+package_optimized/*.dist-info/
+package_optimized/bin/
+package_optimized/six.py
+package_optimized/appdirs.py
+package_optimized/typing_extensions.py
+package_optimized/peewee.py
+
+# Deployment packages
 *.zip
+
+# Test/Response files
 response*.json
 test_payload.json
 sp500*.json
@@ -20,6 +56,7 @@ sp500*.json
 # IDE
 .vscode/
 .idea/
+.claude/
 
 # Logs
 *.log

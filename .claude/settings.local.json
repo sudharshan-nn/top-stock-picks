@@ -25,7 +25,9 @@
       "Bash(unzip:*)",
       "Bash(curl -s 'https://en.wikipedia.org/wiki/List_of_S%26P_500_companies')",
       "Bash(aws logs tail:*)",
-      "Bash(awk:*)"
+      "Bash(awk:*)",
+      "Bash(git rm:*)",
+      "Bash(chmod:*)"
     ],
     "deny": [],
     "ask": []
